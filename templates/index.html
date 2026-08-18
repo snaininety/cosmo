@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cosmo's Interactive Space & Solar System Adventure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,6 +14,8 @@
             overflow: hidden;
             background-color: #010206;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
         }
         #canvas-container {
             position: absolute;
@@ -81,7 +83,7 @@
             z-index: 25;
         }
 
-        /* Top-Left Planet & Solar System Controls (Lowered below Sun) */
+        /* Top-Left Planet & Solar System Controls */
         #planet-controls-container {
             position: absolute;
             top: 260px;
@@ -139,6 +141,35 @@
             cursor: pointer;
             width: 90px;
         }
+
+        /* Bottom Toolbar */
+        #ui-toolbar {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            z-index: 20;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            justify-content: flex-start;
+            gap: 8px;
+            padding: 10px 16px;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            scrollbar-width: none; /* Hide scrollbar for clean UI */
+        }
+        #ui-toolbar::-webkit-scrollbar {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            #ui-toolbar {
+                justify-content: center;
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+        }
         
         .mic-btn {
             background: rgba(220, 38, 38, 0.8);
@@ -189,7 +220,7 @@
         <button id="mic-toggle" class="action-btn mic-btn" onclick="toggleVoiceRecognition()">🎤 Click to Ask Cosmo</button>
     </div>
 
-    <!-- Top-Left Planet Controls (Lowered below Sun) -->
+    <!-- Top-Left Planet Controls -->
     <div id="planet-controls-container">
         <button id="constellation-btn" class="action-btn" onclick="toggleConstellations()">✨ Constellations</button>
         <div id="speed-control-box">
@@ -199,7 +230,7 @@
     </div>
 
     <!-- Bottom Cosmo Action Toolbar -->
-    <div id="ui-toolbar" class="absolute bottom-8 left-0 right-0 z-20 flex flex-wrap justify-center items-center gap-3 px-4 pointer-events-auto opacity-0 transition-opacity duration-500">
+    <div id="ui-toolbar">
         <button class="action-btn" onclick="playAction('Idle')">Idle</button>
         <button class="action-btn" onclick="playAction('Walking')">Walk</button>
         <button class="action-btn" onclick="playAction('Running')">Run</button>
@@ -601,11 +632,10 @@
             robotSpeak("Rocket ignition! Heavy liftoff in progress...");
             playAction('Cheer');
 
-            // After 3.5 seconds, start slow descent back to base
             setTimeout(() => {
                 rocketState = 'descending';
-                rocketGroup.position.y = 45; // Start descent from upper sky
-                rocketVelocity = 0.5; // Controlled initial descent speed
+                rocketGroup.position.y = 45;
+                rocketVelocity = 0.5;
                 robotSpeak("Mission accomplished! Initiating controlled descent back to base...");
             }, 3500);
         };
@@ -1283,7 +1313,7 @@
                 rocketGroup.position.y += rocketVelocity * deltaTime * 10;
             } else if (rocketState === 'descending') {
                 rocketFlame.visible = true;
-                rocketGroup.position.y -= 8.0 * deltaTime; // Smooth descent speed
+                rocketGroup.position.y -= 8.0 * deltaTime;
                 if (rocketGroup.position.y <= rocketOriginalPos.y) {
                     rocketGroup.position.copy(rocketOriginalPos);
                     rocketFlame.visible = false;
