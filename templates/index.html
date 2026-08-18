@@ -16,6 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             -webkit-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
         }
         #canvas-container {
             position: absolute;
@@ -86,34 +87,32 @@
         /* Top-Left Planet & Solar System Controls */
         #planet-controls-container {
             position: absolute;
-            top: 260px;
-            left: 20px;
+            top: 240px;
+            left: 15px;
             z-index: 25;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             pointer-events: auto;
         }
 
         .action-btn {
-            background: rgba(30, 41, 59, 0.8);
+            background: rgba(30, 41, 59, 0.85);
             border: 1px solid rgba(51, 65, 85, 1);
             color: #e2e8f0;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 9999px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             backdrop-filter: blur(8px);
             transition: all 0.2s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .action-btn:hover {
+        .action-btn:hover, .action-btn:active {
             background: rgba(79, 70, 229, 0.9);
             border-color: rgba(99, 102, 241, 1);
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px -3px rgba(79, 70, 229, 0.4);
         }
         .action-btn.active {
             background: rgb(79, 70, 229);
@@ -125,21 +124,20 @@
         #speed-control-box {
             background: rgba(30, 41, 59, 0.85);
             border: 1px solid rgba(51, 65, 85, 1);
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 9999px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             color: #e2e8f0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             backdrop-filter: blur(8px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         #speed-slider {
             accent-color: #6366f1;
             cursor: pointer;
-            width: 90px;
+            width: 75px;
         }
 
         /* Bottom Toolbar */
@@ -158,7 +156,7 @@
             pointer-events: auto;
             opacity: 0;
             transition: opacity 0.5s ease;
-            scrollbar-width: none; /* Hide scrollbar for clean UI */
+            scrollbar-width: none;
         }
         #ui-toolbar::-webkit-scrollbar {
             display: none;
@@ -217,7 +215,7 @@
     <div id="speech-bubble"></div>
 
     <div id="top-mic-container">
-        <button id="mic-toggle" class="action-btn mic-btn" onclick="toggleVoiceRecognition()">🎤 Click to Ask Cosmo</button>
+        <button id="mic-toggle" class="action-btn mic-btn" onclick="toggleVoiceRecognition()">🎤 Ask Cosmo</button>
     </div>
 
     <!-- Top-Left Planet Controls -->
@@ -263,7 +261,7 @@
         scene.background = new THREE.Color(0x010206);
 
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, -3, 18);
+        camera.position.set(0, -2, 22); // Adjusted camera distance for mobile view
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -273,7 +271,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.target.set(0, -4.0, 0);
+        controls.target.set(0, -3.5, 0);
 
         controls.mouseButtons = {
             LEFT: null,
@@ -287,7 +285,7 @@
         scene.add(ambientLight);
 
         const sunLight = new THREE.DirectionalLight(0xffffff, 4.0);
-        sunLight.position.set(-30, 20, 20);
+        sunLight.position.set(-20, 15, 20);
         scene.add(sunLight);
 
         const clickableObjects = [];
@@ -356,7 +354,7 @@
 
             if (constellationsActive) {
                 btn.classList.add('active');
-                robotSpeak("Constellation mode enabled! Behold the stellar star maps.");
+                robotSpeak("Constellation mode enabled!");
             } else {
                 btn.classList.remove('active');
                 robotSpeak("Constellation mode disabled.");
@@ -441,13 +439,13 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // --- SUN & PLANETS ---
+        // --- SUN & PLANETS (Centered & Brought Closer for Mobile View) ---
         const sunGroup = new THREE.Group();
-        sunGroup.position.set(-38, 5, -45);
+        sunGroup.position.set(-22, 3, -30);
         scene.add(sunGroup);
 
         const sunMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(9.0, 32, 32),
+            new THREE.SphereGeometry(7.0, 32, 32),
             new THREE.MeshBasicMaterial({ color: 0xf59e0b })
         );
         sunMesh.geometry.computeBoundingSphere();
@@ -527,23 +525,23 @@
         }
 
         function getPlanetName(distance) {
-            if (distance === 12) return "Mercury";
-            if (distance === 18) return "Venus";
-            if (distance === 26) return "Earth";
-            if (distance === 34) return "Mars";
-            if (distance === 44) return "Jupiter";
-            if (distance === 54) return "Saturn";
-            if (distance === 64) return "Uranus";
-            if (distance === 74) return "Neptune";
+            if (distance === 10) return "Mercury";
+            if (distance === 15) return "Venus";
+            if (distance === 21) return "Earth";
+            if (distance === 28) return "Mars";
+            if (distance === 36) return "Jupiter";
+            if (distance === 44) return "Saturn";
+            if (distance === 52) return "Uranus";
+            if (distance === 60) return "Neptune";
             return "Planet";
         }
 
-        createOrbitPlanet(0.5, 0xa1a1aa, 12, 0.14);
-        createOrbitPlanet(0.9, 0xf97316, 18, 0.11);
+        createOrbitPlanet(0.4, 0xa1a1aa, 10, 0.14);
+        createOrbitPlanet(0.8, 0xf97316, 15, 0.11);
         
-        const earthMesh = createOrbitPlanet(1.2, 0x2563eb, 26, 0.08, false, 'earth', "Earth");
+        const earthMesh = createOrbitPlanet(1.1, 0x2563eb, 21, 0.08, false, 'earth', "Earth");
         
-        const cloudGeo = new THREE.SphereGeometry(1.25, 32, 32);
+        const cloudGeo = new THREE.SphereGeometry(1.15, 32, 32);
         cloudGeo.computeBoundingSphere();
         const cloudMesh = new THREE.Mesh(
             cloudGeo,
@@ -553,7 +551,7 @@
         earthMesh.add(cloudMesh);
         clickableObjects.push(cloudMesh);
 
-        const moonGeo = new THREE.SphereGeometry(0.25, 16, 16);
+        const moonGeo = new THREE.SphereGeometry(0.22, 16, 16);
         moonGeo.computeBoundingSphere();
         const moonMesh = new THREE.Mesh(
             moonGeo,
@@ -563,17 +561,17 @@
         earthMesh.add(moonMesh);
         clickableObjects.push(moonMesh);
 
-        createOrbitPlanet(0.8, 0xdc2626, 34, 0.06);
-        createOrbitPlanet(2.2, 0xb45309, 44, 0.035, false, 'jupiter');
-        createOrbitPlanet(1.8, 0xfde047, 54, 0.025, true);
-        createOrbitPlanet(1.3, 0x38bdf8, 64, 0.018);
-        createOrbitPlanet(1.2, 0x3b82f6, 74, 0.012);
+        createOrbitPlanet(0.7, 0xdc2626, 28, 0.06);
+        createOrbitPlanet(1.8, 0xb45309, 36, 0.035, false, 'jupiter');
+        createOrbitPlanet(1.5, 0xfde047, 44, 0.025, true);
+        createOrbitPlanet(1.1, 0x38bdf8, 52, 0.018);
+        createOrbitPlanet(1.0, 0x3b82f6, 60, 0.012);
 
         // --- ROCKET SHIP ---
         const rocketGroup = new THREE.Group();
-        const rocketOriginalPos = new THREE.Vector3(4.5, -5.5, 1.5);
+        const rocketOriginalPos = new THREE.Vector3(3.5, -4.5, 1.2);
         rocketGroup.position.copy(rocketOriginalPos);
-        rocketGroup.scale.set(1.4, 1.4, 1.4);
+        rocketGroup.scale.set(1.2, 1.2, 1.2);
         scene.add(rocketGroup);
 
         const metalMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.8, roughness: 0.2 });
@@ -619,7 +617,7 @@
         rocketGroup.userData = { isRocket: true, originalScale: rocketGroup.scale.x };
         clickableObjects.push(rocketGroup);
 
-        let rocketState = 'idle'; // 'idle', 'launching', 'descending'
+        let rocketState = 'idle';
         let rocketVelocity = 0;
         let rocketLaunchTimer = 0;
 
@@ -629,14 +627,14 @@
             rocketVelocity = 0.02;
             rocketLaunchTimer = 0;
             rocketFlame.visible = true;
-            robotSpeak("Rocket ignition! Heavy liftoff in progress...");
+            robotSpeak("Rocket ignition! Liftoff in progress...");
             playAction('Cheer');
 
             setTimeout(() => {
                 rocketState = 'descending';
-                rocketGroup.position.y = 45;
+                rocketGroup.position.y = 35;
                 rocketVelocity = 0.5;
-                robotSpeak("Mission accomplished! Initiating controlled descent back to base...");
+                robotSpeak("Mission accomplished! Descending back to base...");
             }, 3500);
         };
 
@@ -652,7 +650,7 @@
                 if (data.answer) {
                     robotSpeak(data.answer);
                 } else {
-                    robotSpeak(`${objectName} is an amazing marvel of our solar system!`);
+                    robotSpeak(`${objectName} is an amazing marvel of space!`);
                 }
             } catch (error) {
                 console.error("Gemini request failed:", error);
@@ -662,7 +660,7 @@
 
         // --- CINEMATIC CAMERA ZOOM MODE ---
         let isCinematicZoom = false;
-        let cinematicTargetLook = new THREE.Vector3(0, -4, 0);
+        let cinematicTargetLook = new THREE.Vector3(0, -3.5, 0);
 
         function zoomToTarget(mesh) {
             const worldPos = new THREE.Vector3();
@@ -674,40 +672,55 @@
             }, 4000);
         }
 
-        // --- HOVER EFFECT ---
-        let hoveredObject = null;
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // --- UNIFIED TAP & CLICK HANDLER FOR MOBILE & DESKTOP ---
+        function handleInteraction(clientX, clientY) {
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
             sunGroup.updateMatrixWorld(true);
+
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(clickableObjects, true);
 
             if (intersects.length > 0) {
-                const hit = intersects[0].object;
-                if (hoveredObject !== hit) {
-                    if (hoveredObject && hoveredObject.userData.originalScale) {
-                        hoveredObject.scale.set(hoveredObject.userData.originalScale, hoveredObject.userData.originalScale, hoveredObject.userData.originalScale);
-                    }
-                    hoveredObject = hit;
-                    document.body.style.cursor = 'pointer';
+                playChimeSound();
+                let clickedObject = intersects[0].object;
+                
+                let searchObj = clickedObject;
+                while(searchObj && !searchObj.userData.planetName && !searchObj.userData.isRocket) {
+                    searchObj = searchObj.parent;
                 }
-                if (hoveredObject.userData.originalScale) {
-                    hoveredObject.scale.set(
-                        hoveredObject.userData.originalScale * 1.25,
-                        hoveredObject.userData.originalScale * 1.25,
-                        hoveredObject.userData.originalScale * 1.25
-                    );
+
+                if (searchObj === rocketGroup || (searchObj && searchObj.userData.isRocket)) {
+                    triggerRocketLaunch();
+                    return;
+                }
+
+                if (searchObj && searchObj.userData && searchObj.userData.planetName) {
+                    const planetName = searchObj.userData.planetName;
+                    fetchCelestialFunFact(planetName);
+                    zoomToTarget(searchObj);
+                    if (actions['Wave']) {
+                        window.playAction('Wave');
+                    }
                 }
             } else {
-                if (hoveredObject && hoveredObject.userData.originalScale) {
-                    hoveredObject.scale.set(hoveredObject.userData.originalScale, hoveredObject.userData.originalScale, hoveredObject.userData.originalScale);
-                }
-                hoveredObject = null;
-                document.body.style.cursor = 'default';
+                spawnShootingStar();
             }
+        }
+
+        window.addEventListener('click', (event) => {
+            if (event.target.closest('#ui-toolbar') || event.target.closest('#top-mic-container') || event.target.closest('#planet-controls-container')) return;
+            handleInteraction(event.clientX, event.clientY);
         });
+
+        window.addEventListener('touchend', (event) => {
+            if (event.target.closest('#ui-toolbar') || event.target.closest('#top-mic-container') || event.target.closest('#planet-controls-container')) return;
+            if (event.changedTouches.length > 0) {
+                const touch = event.changedTouches[0];
+                handleInteraction(touch.clientX, touch.clientY);
+            }
+        }, { passive: true });
 
         // --- BUTTON STATE MANAGEMENT HELPER ---
         function setButtonState(state) {
@@ -724,7 +737,7 @@
                 micBtn.classList.add('state-thinking');
                 micBtn.innerText = "🟡 thinking";
             } else {
-                micBtn.innerText = "🎤 Click to Ask Cosmo";
+                micBtn.innerText = "🎤 Ask Cosmo";
             }
         }
 
@@ -859,21 +872,21 @@
                 globalOrbitSpeedMultiplier = 2.5;
                 document.getElementById('speed-slider').value = 2.5;
                 document.getElementById('speed-val').innerText = "2.5";
-                robotSpeak("Warp speed! Orbits are speeding up!");
+                robotSpeak("Warp speed!");
                 isProcessingAI = false;
                 return;
             } else if (qLower.includes('slow down') || qLower.includes('slower')) {
                 globalOrbitSpeedMultiplier = 0.3;
                 document.getElementById('speed-slider').value = 0.3;
                 document.getElementById('speed-val').innerText = "0.3";
-                robotSpeak("Taking it nice and slow now.");
+                robotSpeak("Slowing down orbits.");
                 isProcessingAI = false;
                 return;
             } else if (qLower.includes('normal speed') || qLower.includes('reset speed')) {
                 globalOrbitSpeedMultiplier = 1.0;
                 document.getElementById('speed-slider').value = 1.0;
                 document.getElementById('speed-val').innerText = "1.0";
-                robotSpeak("Orbits back to normal speed.");
+                robotSpeak("Speed reset.");
                 isProcessingAI = false;
                 return;
             }
@@ -890,52 +903,13 @@
                 }
             } catch (error) {
                 console.error("AI request failed:", error);
-                robotSpeak("I couldn't reach mission control!");
+                robotSpeak("Connection error!");
                 isSpeakingNow = false;
                 if (isListening) setButtonState('listening');
             } finally {
                 isProcessingAI = false;
             }
         }
-
-        // --- MOUSE CLICK INTERACTION ---
-        window.addEventListener('click', (event) => {
-            if (event.target.closest('#ui-toolbar') || event.target.closest('#top-mic-container') || event.target.closest('#planet-controls-container')) return;
-
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            sunGroup.updateMatrixWorld(true);
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(clickableObjects, true);
-
-            if (intersects.length > 0) {
-                playChimeSound();
-                let clickedObject = intersects[0].object;
-                
-                let searchObj = clickedObject;
-                while(searchObj && !searchObj.userData.planetName && !searchObj.userData.isRocket) {
-                    searchObj = searchObj.parent;
-                }
-
-                if (searchObj === rocketGroup || (searchObj && searchObj.userData.isRocket)) {
-                    triggerRocketLaunch();
-                    return;
-                }
-
-                if (searchObj && searchObj.userData && searchObj.userData.planetName) {
-                    const planetName = searchObj.userData.planetName;
-                    fetchCelestialFunFact(planetName);
-                    zoomToTarget(searchObj);
-                    if (actions['Wave']) {
-                        window.playAction('Wave');
-                    }
-                }
-            } else {
-                spawnShootingStar();
-            }
-        });
 
         // --- BACKGROUND MUSIC ---
         let musicInterval = null;
@@ -988,7 +962,7 @@
 
         // 6. Load 3D Model
         let modelContainer = new THREE.Group();
-        modelContainer.position.set(0, -6.2, 0); 
+        modelContainer.position.set(0, -5.5, 0); 
         scene.add(modelContainer);
         
         let mixer;
@@ -1003,7 +977,7 @@
             const model = gltf.scene;
 
             model.position.set(0, 0, 0);
-            model.scale.set(1.5, 1.5, 1.5);
+            model.scale.set(1.4, 1.4, 1.4);
             modelContainer.add(model);
 
             model.traverse((child) => {
@@ -1024,7 +998,7 @@
                     activeAction = actions['Dance'];
                     activeAction.play();
                     playBackgroundMusic('Dance');
-                    robotSpeak("Hi, I'm Cosmo! Click planets or chat with me!");
+                    robotSpeak("Hi, I'm Cosmo!");
                 }
             }
 
@@ -1094,19 +1068,19 @@
             activeAction.clampWhenFinished = false;
 
             if (name === 'Dance') {
-                robotSpeak("Hit the dance floor! Woohoo!");
+                robotSpeak("Hit the dance floor!");
             } else if (name === 'Walking') {
                 robotSpeak("Space walk.");
             } else if (name === 'Running') {
                 robotSpeak("Warp speed!");
             } else if (name === 'Jump') {
-                robotSpeak("Whee, zero gravity!");
+                robotSpeak("Zero gravity!");
             } else if (name === 'Wave') {
                 robotSpeak("Hello space friend!");
             } else if (name === 'Punch') {
-                robotSpeak("Pow! Space punch!");
+                robotSpeak("Space punch!");
             } else if (name === 'Yes') {
-                robotSpeak("You got it!");
+                robotSpeak("Got it!");
             } else if (name === 'Sitting') {
                 activeAction.setLoop(THREE.LoopOnce);
                 activeAction.clampWhenFinished = true;
@@ -1115,7 +1089,7 @@
             } else if (name === 'Idle') {
                 robotSpeak("Standing by.");
             } else if (name === 'Cheer') {
-                robotSpeak("Hooray! Let's go!");
+                robotSpeak("Hooray!");
             }
 
             if (name === 'Death') {
@@ -1191,18 +1165,16 @@
                     return;
                 }
 
-                console.log("User valid speech heard:", speechToText);
-
                 setButtonState('thinking');
                 window.speechSynthesis.cancel();
 
                 if (speechToText.includes('dance')) {
                     window.playAction('Dance');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
-                } else if (speechToText.includes('walk') || speechToText.includes('walking')) {
+                } else if (speechToText.includes('walk')) {
                     window.playAction('Walking');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
-                } else if (speechToText.includes('run') || speechToText.includes('running')) {
+                } else if (speechToText.includes('run')) {
                     window.playAction('Running');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
                 } else if (speechToText.includes('jump')) {
@@ -1211,25 +1183,18 @@
                 } else if (speechToText.includes('wave')) {
                     window.playAction('Wave');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
-                } else if (speechToText.includes('punch')) {
-                    window.playAction('Punch');
-                    if (isListening) setTimeout(() => setButtonState('listening'), 1000);
                 } else if (speechToText.includes('sit')) {
                     window.playAction('Sitting');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
                 } else if (speechToText.includes('sleep') || speechToText.includes('death')) {
                     window.playAction('Death');
                     if (isListening) setTimeout(() => setButtonState('listening'), 1000);
-                } else if (speechToText.includes('idle')) {
-                    window.playAction('Idle');
-                    if (isListening) setTimeout(() => setButtonState('listening'), 1000);
                 } else {
                     askCosmoAI(speechToText);
                 }
             };
 
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error", event.error);
+            recognition.onerror = () => {
                 if (isListening && !isSpeakingNow) {
                     try { recognition.start(); } catch(e){}
                 }
@@ -1247,7 +1212,7 @@
 
         window.toggleVoiceRecognition = async function() {
             if (!recognition) {
-                alert("Voice recognition is not supported in your browser. Try using Google Chrome.");
+                alert("Voice recognition is not supported in your browser. Use Safari or Chrome on iOS.");
                 return;
             }
 
@@ -1261,17 +1226,11 @@
 
                     isListening = true;
                     setButtonState('listening');
-
-                    document.getElementById('mic-toggle').blur();
-                    const syntheticClick = new MouseEvent('click', { clientX: 10, clientY: 10, bubbles: true });
-                    renderer.domElement.dispatchEvent(syntheticClick);
-                    window.focus();
-
                     recognition.start();
-                    robotSpeak("I'm listening, ask me anything!");
+                    robotSpeak("I'm listening!");
                 } catch (err) {
                     console.error("Microphone access error:", err);
-                    alert("Please allow microphone access to talk with Cosmo!");
+                    alert("Please allow microphone access in your iPhone settings!");
                 }
             } else {
                 stopListening();
@@ -1318,7 +1277,7 @@
                     rocketGroup.position.copy(rocketOriginalPos);
                     rocketFlame.visible = false;
                     rocketState = 'idle';
-                    robotSpeak("Rocket has landed safely back at base!");
+                    robotSpeak("Rocket landed safely back at base!");
                 }
             }
 
@@ -1351,7 +1310,7 @@
             if (isCinematicZoom) {
                 controls.target.lerp(cinematicTargetLook, 3 * deltaTime);
             } else {
-                controls.target.lerp(new THREE.Vector3(0, -4.0, 0), 3 * deltaTime);
+                controls.target.lerp(new THREE.Vector3(0, -3.5, 0), 3 * deltaTime);
             }
 
             const newAngle = currentAngle + (targetAngle - currentAngle) * 3 * deltaTime;
