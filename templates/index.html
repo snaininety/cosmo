@@ -66,22 +66,33 @@
             transform: translateY(0);
         }
 
-        /* Hide buttons/controls entirely on mobile screens */
+        /* Mobile Layout Adjustments: Hide desktop controls, show bottom mic button */
         @media (max-width: 768px) {
-            #top-mic-container,
             #planet-controls-container,
             #ui-toolbar {
                 display: none !important;
             }
+            #top-mic-container {
+                position: absolute;
+                bottom: 25px;
+                left: 50%;
+                transform: translateX(-50%);
+                top: auto;
+                right: auto;
+                z-index: 25;
+            }
         }
 
         /* Desktop Controls Styles */
-        #top-mic-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 25;
+        @media (min-width: 769px) {
+            #top-mic-container {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 25;
+            }
         }
+
         #planet-controls-container {
             position: absolute;
             top: 20px;
@@ -153,6 +164,37 @@
             border: 1px solid rgba(239, 68, 68, 1);
             color: white;
         }
+        .mic-btn.state-listening {
+            background: rgba(16, 185, 129, 0.9);
+            border-color: rgba(52, 211, 153, 1);
+            animation: pulse-green 1.5s infinite;
+        }
+        .mic-btn.state-getting {
+            background: rgba(37, 99, 235, 0.9);
+            border-color: rgba(96, 165, 250, 1);
+            animation: pulse-blue 1.5s infinite;
+        }
+        .mic-btn.state-thinking {
+            background: rgba(234, 179, 8, 0.9);
+            border-color: rgba(250, 204, 21, 1);
+            animation: pulse-yellow 1.5s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes pulse-blue {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        @keyframes pulse-yellow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
     </style>
 </head>
 <body>
@@ -218,7 +260,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.target.set(0, -3.0, 0);
+        controls.target.set(0, -3.5, 0);
 
         controls.mouseButtons = {
             LEFT: null,
@@ -360,7 +402,6 @@
             const orbit = new THREE.Group();
             sunGroup.add(orbit);
 
-            // Make orbit lines clearly visible
             const orbitLineGeo = new THREE.RingGeometry(distance - 0.05, distance + 0.05, 128);
             const orbitLineMat = new THREE.MeshBasicMaterial({ 
                 color: color || 0x38bdf8, 
@@ -432,9 +473,9 @@
         createOrbitPlanet(0.9, 0x38bdf8, 44, 0.018);
         createOrbitPlanet(0.85, 0x3b82f6, 51, 0.012);
 
-        // --- ROCKET SHIP PLACED BESIDE COSMO ---
+        // --- ROCKET SHIP PLACED BESIDE COSMO (NON-OVERLAPPING) ---
         const rocketGroup = new THREE.Group();
-        const rocketOriginalPos = new THREE.Vector3(1.4, -4.5, 1.0);
+        const rocketOriginalPos = new THREE.Vector3(1.6, -6.5, 1.0); // Placed safely beside Cosmo
         rocketGroup.position.copy(rocketOriginalPos);
         rocketGroup.scale.set(1.1, 1.1, 1.1);
         scene.add(rocketGroup);
@@ -488,6 +529,50 @@
             }, 3500);
         };
 
+        // --- LOAD 3D CHARACTER (COSMO) LOWER CENTER ---
+        let modelContainer = new THREE.Group();
+        modelContainer.position.set(0, -7.2, 0); // Positioned lower on the screen
+        scene.add(modelContainer);
+        
+        let mixer;
+        const actions = {};
+        let activeAction;
+
+        const loader = new GLTFLoader();
+        loader.load('https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb', (gltf) => {
+            const model = gltf.scene;
+            model.position.set(0, 0, 0);
+            model.scale.set(1.4, 1.4, 1.4);
+            modelContainer.add(model);
+
+            if (gltf.animations && gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(model);
+                gltf.animations.forEach((clip) => {
+                    actions[clip.name] = mixer.clipAction(clip);
+                });
+                if (actions['Dance']) {
+                    activeAction = actions['Dance'];
+                    activeAction.play();
+                    robotSpeak("Hi, I'm Cosmo! Explore the solar system!");
+                }
+            }
+
+            document.getElementById('ui-toolbar').style.opacity = '1';
+            const loaderElem = document.getElementById('loading');
+            if (loaderElem) {
+                loaderElem.style.opacity = '0';
+                setTimeout(() => loaderElem.remove(), 500);
+            }
+        });
+
+        window.playAction = function(name) {
+            if (!actions[name] || activeAction === actions[name]) return;
+            const previousAction = activeAction;
+            activeAction = actions[name];
+            activeAction.reset().fadeIn(0.5).play();
+            previousAction.fadeOut(0.5);
+        };
+
         // --- GEMINI AI FUN FACT FETCH ---
         async function fetchCelestialFunFact(objectName) {
             try {
@@ -509,7 +594,7 @@
         }
 
         let isCinematicZoom = false;
-        let cinematicTargetLook = new THREE.Vector3(0, -3.0, 0);
+        let cinematicTargetLook = new THREE.Vector3(0, -4.5, 0);
 
         function zoomToTarget(mesh) {
             const worldPos = new THREE.Vector3();
@@ -606,49 +691,63 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- LOAD 3D CHARACTER (COSMO) IN LOWER CENTER ---
-        let modelContainer = new THREE.Group();
-        modelContainer.position.set(0, -5.2, 0); // Placed in lower center
-        scene.add(modelContainer);
-        
-        let mixer;
-        const actions = {};
-        let activeAction;
-        let robotHeadBone = null;
+        let recognition = null;
+        let isListening = false;
+        let mediaStream = null;
 
-        const loader = new GLTFLoader();
-        loader.load('https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb', (gltf) => {
-            const model = gltf.scene;
-            model.position.set(0, 0, 0);
-            model.scale.set(1.4, 1.4, 1.4);
-            modelContainer.add(model);
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
 
-            if (gltf.animations && gltf.animations.length > 0) {
-                mixer = new THREE.AnimationMixer(model);
-                gltf.animations.forEach((clip) => {
-                    actions[clip.name] = mixer.clipAction(clip);
-                });
-                if (actions['Dance']) {
-                    activeAction = actions['Dance'];
-                    activeAction.play();
-                    robotSpeak("Hi, I'm Cosmo! Explore the solar system!");
+            recognition.onresult = (event) => {
+                if (isSpeakingNow) return;
+                const latestResult = event.results[event.results.length - 1];
+                if (!latestResult.isFinal) return;
+                const speechToText = latestResult[0].transcript.trim().toLowerCase();
+                window.speechSynthesis.cancel();
+                
+                if (speechToText.includes('dance')) window.playAction('Dance');
+                else if (speechToText.includes('jump')) window.playAction('Jump');
+                else if (speechToText.includes('rocket')) triggerRocketLaunch();
+                else {
+                    fetch('/ask-gemini', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: speechToText })
+                    }).then(res => res.json()).then(data => {
+                        if (data.answer) robotSpeak(data.answer);
+                    });
                 }
-            }
+            };
+        }
 
-            document.getElementById('ui-toolbar').style.opacity = '1';
-            const loaderElem = document.getElementById('loading');
-            if (loaderElem) {
-                loaderElem.style.opacity = '0';
-                setTimeout(() => loaderElem.remove(), 500);
+        window.toggleVoiceRecognition = async function() {
+            if (!recognition) {
+                alert("Voice recognition not supported.");
+                return;
             }
-        });
-
-        window.playAction = function(name) {
-            if (!actions[name] || activeAction === actions[name]) return;
-            const previousAction = activeAction;
-            activeAction = actions[name];
-            activeAction.reset().fadeIn(0.5).play();
-            previousAction.fadeOut(0.5);
+            initAudio();
+            if (!isListening) {
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    isListening = true;
+                    document.getElementById('mic-toggle').classList.add('state-listening');
+                    document.getElementById('mic-toggle').innerText = "🟢 Listening...";
+                    recognition.start();
+                    robotSpeak("I'm listening!");
+                } catch(e) {
+                    alert("Microphone permission denied.");
+                }
+            } else {
+                isListening = false;
+                recognition.stop();
+                if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+                document.getElementById('mic-toggle').classList.remove('state-listening');
+                document.getElementById('mic-toggle').innerText = "🎤 Ask Cosmo";
+            }
         };
 
         // --- ANIMATION LOOP ---
@@ -688,7 +787,7 @@
             if (isCinematicZoom) {
                 controls.target.lerp(cinematicTargetLook, 3 * deltaTime);
             } else {
-                controls.target.lerp(new THREE.Vector3(0, -3.0, 0), 3 * deltaTime);
+                controls.target.lerp(new THREE.Vector3(0, -4.5, 0), 3 * deltaTime);
             }
 
             controls.update();
