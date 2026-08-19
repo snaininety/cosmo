@@ -159,41 +159,57 @@
             opacity: 0;
             transition: opacity 0.5s ease;
         }
+
+        /* Mode Colors */
         .mic-btn {
-            background: rgba(220, 38, 38, 0.8);
-            border: 1px solid rgba(239, 68, 68, 1);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(203, 213, 225, 1);
+            color: #0f172a;
+        }
+        .mic-btn.state-active-hearing {
+            background: rgba(220, 38, 38, 0.9); /* Red */
+            border-color: rgba(239, 68, 68, 1);
             color: white;
+            animation: pulse-red 1.5s infinite;
         }
         .mic-btn.state-listening {
-            background: rgba(16, 185, 129, 0.9);
+            background: rgba(16, 185, 129, 0.9); /* Green */
             border-color: rgba(52, 211, 153, 1);
+            color: white;
             animation: pulse-green 1.5s infinite;
         }
-        .mic-btn.state-getting {
-            background: rgba(37, 99, 235, 0.9);
-            border-color: rgba(96, 165, 250, 1);
-            animation: pulse-blue 1.5s infinite;
-        }
         .mic-btn.state-thinking {
-            background: rgba(234, 179, 8, 0.9);
+            background: rgba(234, 179, 8, 0.9); /* Yellow */
             border-color: rgba(250, 204, 21, 1);
+            color: white;
             animation: pulse-yellow 1.5s infinite;
         }
+        .mic-btn.state-talking {
+            background: rgba(37, 99, 235, 0.9); /* Blue */
+            border-color: rgba(96, 165, 250, 1);
+            color: white;
+            animation: pulse-blue 1.5s infinite;
+        }
 
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
         @keyframes pulse-green {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        @keyframes pulse-blue {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-        }
         @keyframes pulse-yellow {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+        @keyframes pulse-blue {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
     </style>
 </head>
@@ -372,15 +388,15 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // --- SUN & PLANET SYSTEM ON THE LEFT, TILTED AT AN ANGLE ---
+        // --- SUN & PLANET SYSTEM PUSHED DEEP INTO THE BACKGROUND (Z = -45) ---
         const sunGroup = new THREE.Group();
-        sunGroup.position.set(-6, -1, -15);
+        sunGroup.position.set(0, 4.0, -45); // Pushed far back behind Cosmo so nothing ever overlaps the foreground
         sunGroup.rotation.x = 0.4;
         sunGroup.rotation.z = -0.2;
         scene.add(sunGroup);
 
         const sunMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(5.5, 32, 32),
+            new THREE.SphereGeometry(7.0, 32, 32),
             new THREE.MeshBasicMaterial({ color: 0xf59e0b })
         );
         sunMesh.geometry.computeBoundingSphere();
@@ -388,7 +404,7 @@
         sunGroup.add(sunMesh);
         clickableObjects.push(sunMesh);
 
-        const localSunLight = new THREE.PointLight(0xffedd5, 8.0, 300);
+        const localSunLight = new THREE.PointLight(0xffedd5, 8.0, 400);
         sunGroup.add(localSunLight);
 
         const planetOrbits = [];
@@ -404,7 +420,7 @@
             const orbit = new THREE.Group();
             sunGroup.add(orbit);
 
-            const orbitLineGeo = new THREE.RingGeometry(distance - 0.05, distance + 0.05, 128);
+            const orbitLineGeo = new THREE.RingGeometry(distance - 0.06, distance + 0.06, 128);
             const orbitLineMat = new THREE.MeshBasicMaterial({ 
                 color: color || 0x38bdf8, 
                 side: THREE.DoubleSide, 
@@ -447,39 +463,39 @@
         }
 
         function getPlanetName(distance) {
-            if (distance === 8) return "Mercury";
-            if (distance === 11) return "Venus";
-            if (distance === 15) return "Earth";
-            if (distance === 19) return "Mars";
-            if (distance === 24) return "Jupiter";
-            if (distance === 29) return "Saturn";
-            if (distance === 34) return "Uranus";
-            if (distance === 39) return "Neptune";
+            if (distance === 10) return "Mercury";
+            if (distance === 14) return "Venus";
+            if (distance === 19) return "Earth";
+            if (distance === 24) return "Mars";
+            if (distance === 30) return "Jupiter";
+            if (distance === 36) return "Saturn";
+            if (distance === 42) return "Uranus";
+            if (distance === 48) return "Neptune";
             return "Planet";
         }
 
-        createOrbitPlanet(0.3, 0xa1a1aa, 8, 0.14);
-        createOrbitPlanet(0.6, 0xf97316, 11, 0.11);
-        const earthMesh = createOrbitPlanet(0.8, 0x2563eb, 15, 0.08, false, 'earth', "Earth");
+        createOrbitPlanet(0.35, 0xa1a1aa, 10, 0.14);
+        createOrbitPlanet(0.7, 0xf97316, 14, 0.11);
+        const earthMesh = createOrbitPlanet(0.9, 0x2563eb, 19, 0.08, false, 'earth', "Earth");
         
-        const moonGeo = new THREE.SphereGeometry(0.18, 16, 16);
+        const moonGeo = new THREE.SphereGeometry(0.2, 16, 16);
         moonGeo.computeBoundingSphere();
         const moonMesh = new THREE.Mesh(moonGeo, new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
         moonMesh.userData = { planetName: "Moon", originalScale: moonMesh.scale.x };
         earthMesh.add(moonMesh);
         clickableObjects.push(moonMesh);
 
-        createOrbitPlanet(0.5, 0xdc2626, 19, 0.06);
-        createOrbitPlanet(1.2, 0xb45309, 24, 0.035, false, 'jupiter');
-        createOrbitPlanet(1.0, 0xfde047, 29, 0.025, true);
-        createOrbitPlanet(0.75, 0x38bdf8, 34, 0.018);
-        createOrbitPlanet(0.7, 0x3b82f6, 39, 0.012);
+        createOrbitPlanet(0.6, 0xdc2626, 24, 0.06);
+        createOrbitPlanet(1.4, 0xb45309, 30, 0.035, false, 'jupiter');
+        createOrbitPlanet(1.2, 0xfde047, 36, 0.025, true);
+        createOrbitPlanet(0.9, 0x38bdf8, 42, 0.018);
+        createOrbitPlanet(0.85, 0x3b82f6, 48, 0.012);
 
-        // --- ROCKET SHIP POSITIONED DIRECTLY BESIDE COSMO (HORIZONTALLY CENTERED AT x = 0) ---
+        // --- ROCKET SHIP POSITIONED DIRECTLY BESIDE COSMO (FOREGROUND) ---
         const rocketGroup = new THREE.Group();
-        const rocketOriginalPos = new THREE.Vector3(1.4, -9.0, 1.0); // Right beside Cosmo at x = 0
+        const rocketOriginalPos = new THREE.Vector3(4.4, -13.0, 1.0);
         rocketGroup.position.copy(rocketOriginalPos);
-        rocketGroup.scale.set(1.4, 1.4, 1.4);
+        rocketGroup.scale.set(1.4, 2.3, 1.4);
         scene.add(rocketGroup);
 
         const metalMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.8, roughness: 0.2 });
@@ -511,29 +527,20 @@
         rocketGroup.userData = { isRocket: true, originalScale: rocketGroup.scale.x };
         clickableObjects.push(rocketGroup);
 
-        let rocketState = 'idle';
-        let rocketVelocity = 0;
-        let rocketLaunchTimer = 0;
+        let rocketState = 'idle'; // 'idle', 'liftoff_straight', 'orbiting', 'reentry_descent'
+        let rocketOrbitAngle = 0;
 
         window.triggerRocketLaunch = function() {
             if (rocketState !== 'idle') return;
-            rocketState = 'launching';
-            rocketVelocity = 0.02;
-            rocketLaunchTimer = 0;
+            rocketState = 'liftoff_straight';
             rocketFlame.visible = true;
-            robotSpeak("Rocket ignition! Liftoff in progress...");
+            robotSpeak("Rocket ignition! Vertical liftoff out of the atmosphere!");
             playAction('Cheer');
-
-            setTimeout(() => {
-                rocketState = 'descending';
-                rocketGroup.position.y = 30;
-                robotSpeak("Descending back to base...");
-            }, 3500);
         };
 
-        // --- LOAD 3D CHARACTER (COSMO) EXACTLY CENTERED ABOVE MIC BUTTON (x = 0) ---
+        // --- LOAD 3D CHARACTER (COSMO IN FOREGROUND) ---
         let modelContainer = new THREE.Group();
-        modelContainer.position.set(0, -19.2, 0); // Horizontally centered at x = 0, positioned right above the bottom button
+        modelContainer.position.set(0, -15.2, 0);
         scene.add(modelContainer);
         
         let mixer;
@@ -544,7 +551,7 @@
         loader.load('https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb', (gltf) => {
             const model = gltf.scene;
             model.position.set(0, 0, 0);
-            model.scale.set(1.4, 1.4, 1.4);
+            model.scale.set(1.4, 1.9, 1.4);
             modelContainer.add(model);
 
             if (gltf.animations && gltf.animations.length > 0) {
@@ -677,17 +684,20 @@
 
         function setButtonState(state) {
             const micBtn = document.getElementById('mic-toggle');
-            micBtn.classList.remove('state-listening', 'state-getting', 'state-thinking');
+            micBtn.classList.remove('state-active-hearing', 'state-listening', 'state-thinking', 'state-talking');
 
-            if (state === 'listening') {
+            if (state === 'active-hearing') {
+                micBtn.classList.add('state-active-hearing');
+                micBtn.innerText = "🔴 Listening...";
+            } else if (state === 'listening') {
                 micBtn.classList.add('state-listening');
-                micBtn.innerText = "🟢 Listening...";
-            } else if (state === 'getting') {
-                micBtn.classList.add('state-getting');
-                micBtn.innerText = "🔵 Getting question...";
+                micBtn.innerText = "🟢 Voice Detected";
             } else if (state === 'thinking') {
                 micBtn.classList.add('state-thinking');
                 micBtn.innerText = "🟡 Thinking...";
+            } else if (state === 'talking') {
+                micBtn.classList.add('state-talking');
+                micBtn.innerText = "🔵 Talking...";
             } else {
                 micBtn.innerText = "🎤 Ask Cosmo";
             }
@@ -698,7 +708,7 @@
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             isSpeakingNow = true;
-            setButtonState('thinking');
+            setButtonState('talking');
             
             const bubble = document.getElementById('speech-bubble');
             bubble.innerText = text;
@@ -710,8 +720,11 @@
             utterance.onend = () => {
                 isSpeakingNow = false;
                 bubble.classList.remove('visible');
-                if (isListening) setButtonState('listening');
-                else setButtonState('off');
+                if (isListening) {
+                    setButtonState('active-hearing');
+                } else {
+                    setButtonState('idle');
+                }
             };
             window.speechSynthesis.speak(utterance);
         }
@@ -728,7 +741,7 @@
             recognition.lang = 'en-US';
 
             recognition.onspeechstart = () => {
-                if (isListening && !isSpeakingNow) setButtonState('getting');
+                if (isListening && !isSpeakingNow) setButtonState('listening');
             };
 
             recognition.onresult = (event) => {
@@ -736,7 +749,7 @@
                 const latestResult = event.results[event.results.length - 1];
                 let speechToText = latestResult[0].transcript.trim().toLowerCase();
                 
-                setButtonState('getting');
+                setButtonState('listening');
                 if (!latestResult.isFinal) return;
 
                 setButtonState('thinking');
@@ -765,7 +778,7 @@
 
             recognition.onend = () => {
                 if (isListening && !isSpeakingNow) {
-                    try { recognition.start(); setButtonState('listening'); } catch(e){}
+                    try { recognition.start(); setButtonState('active-hearing'); } catch(e){}
                 }
             };
         }
@@ -780,7 +793,7 @@
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     isListening = true;
-                    setButtonState('listening');
+                    setButtonState('active-hearing');
                     recognition.start();
                     robotSpeak("I'm listening!");
                 } catch(e) {
@@ -800,7 +813,7 @@
                 mediaStream.getTracks().forEach(t => t.stop());
                 mediaStream = null;
             }
-            setButtonState('off');
+            setButtonState('idle');
         }
 
         // --- ANIMATION LOOP ---
@@ -813,18 +826,52 @@
 
             if (mixer) mixer.update(deltaTime);
 
-            if (rocketState === 'launching') {
-                rocketLaunchTimer += deltaTime;
-                rocketVelocity += deltaTime * 15.0;
-                rocketGroup.position.y += rocketVelocity * deltaTime * 8;
-            } else if (rocketState === 'descending') {
+            if (rocketState === 'liftoff_straight') {
                 rocketFlame.visible = true;
-                rocketGroup.position.y -= 7.0 * deltaTime;
+                rocketGroup.rotation.set(0, 0, 0);
+                rocketGroup.position.y += 12.0 * deltaTime;
+
+                if (rocketGroup.position.y > 20.0) {
+                    rocketState = 'orbiting';
+                    rocketOrbitAngle = 0;
+                    robotSpeak("Entered solar orbit!");
+                }
+            } else if (rocketState === 'orbiting') {
+                rocketFlame.visible = true;
+                rocketOrbitAngle += deltaTime * 2.0;
+
+                const orbitRadius = 16.0;
+                const sunWorldPos = new THREE.Vector3(0, 4.0, -45); // Deep background sun position
+                
+                const targetX = sunWorldPos.x + Math.cos(rocketOrbitAngle) * orbitRadius;
+                const targetY = sunWorldPos.y + Math.sin(rocketOrbitAngle * 0.5) * 4.0;
+                const targetZ = sunWorldPos.z + Math.sin(rocketOrbitAngle) * orbitRadius;
+
+                const nextX = sunWorldPos.x + Math.cos(rocketOrbitAngle + 0.05) * orbitRadius;
+                const nextY = sunWorldPos.y + Math.sin((rocketOrbitAngle + 0.05) * 0.5) * 4.0;
+                const nextZ = sunWorldPos.z + Math.sin(rocketOrbitAngle + 0.05) * orbitRadius;
+                
+                rocketGroup.position.set(targetX, targetY, targetZ);
+                rocketGroup.lookAt(nextX, nextY, nextZ);
+                rocketGroup.rotateX(Math.PI / 2);
+
+                if (rocketOrbitAngle >= Math.PI * 4) {
+                    rocketState = 'reentry_descent';
+                    rocketGroup.position.set(4.4, 25.0, 1.0);
+                    rocketGroup.rotation.set(0, 0, 0); 
+                    robotSpeak("Re-entry burn! Returning from above!");
+                }
+            } else if (rocketState === 'reentry_descent') {
+                rocketFlame.visible = true;
+                rocketGroup.rotation.set(0, 0, 0);
+                rocketGroup.position.y -= 10.0 * deltaTime;
+
                 if (rocketGroup.position.y <= rocketOriginalPos.y) {
                     rocketGroup.position.copy(rocketOriginalPos);
+                    rocketGroup.rotation.set(0, 0, 0);
                     rocketFlame.visible = false;
                     rocketState = 'idle';
-                    robotSpeak("Rocket landed safely!");
+                    robotSpeak("Touchdown! Safe back at base!");
                 }
             }
 
