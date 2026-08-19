@@ -372,9 +372,9 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // --- SUN PLACED AT TOP-LEFT CORNER ---
+        // --- LOWERED SUN AND PLANET SYSTEM (Vertically Centered Behind Cosmo) ---
         const sunGroup = new THREE.Group();
-        sunGroup.position.set(isMobile ? -10 : -25, isMobile ? 8 : 5, -25);
+        sunGroup.position.set(0, -3.5, -28); // Centered horizontally and lowered behind Cosmo
         scene.add(sunGroup);
 
         const sunMesh = new THREE.Mesh(
