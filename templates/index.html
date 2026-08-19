@@ -250,7 +250,7 @@
         scene.background = new THREE.Color(0x010206);
 
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, -1, isMobile ? 24 : 18);
+        camera.position.set(2, -1, isMobile ? 24 : 18); // Shifted slightly right to center focus
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -260,7 +260,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.target.set(0, -4.5, 0);
+        controls.target.set(2, -4.5, 0);
 
         controls.mouseButtons = {
             LEFT: null,
@@ -372,13 +372,15 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // --- LOWERED SUN AND PLANET SYSTEM (Vertically Centered Behind Cosmo) ---
+        // --- SUN & PLANET SYSTEM PLACED ON THE LEFT, TILTED AT AN ANGLE ---
         const sunGroup = new THREE.Group();
-        sunGroup.position.set(0, -3.5, -28); // Centered horizontally and lowered behind Cosmo
+        sunGroup.position.set(-6, -1, -15); // Shifted to the left side and balanced vertically
+        sunGroup.rotation.x = 0.4;  // Tilt angle forward/backward
+        sunGroup.rotation.z = -0.2; // Tilt angle sideways
         scene.add(sunGroup);
 
         const sunMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(6.0, 32, 32),
+            new THREE.SphereGeometry(5.5, 32, 32),
             new THREE.MeshBasicMaterial({ color: 0xf59e0b })
         );
         sunMesh.geometry.computeBoundingSphere();
@@ -445,39 +447,39 @@
         }
 
         function getPlanetName(distance) {
-            if (distance === 9) return "Mercury";
-            if (distance === 13) return "Venus";
-            if (distance === 18) return "Earth";
-            if (distance === 23) return "Mars";
-            if (distance === 30) return "Jupiter";
-            if (distance === 37) return "Saturn";
-            if (distance === 44) return "Uranus";
-            if (distance === 51) return "Neptune";
+            if (distance === 8) return "Mercury";
+            if (distance === 11) return "Venus";
+            if (distance === 15) return "Earth";
+            if (distance === 19) return "Mars";
+            if (distance === 24) return "Jupiter";
+            if (distance === 29) return "Saturn";
+            if (distance === 34) return "Uranus";
+            if (distance === 39) return "Neptune";
             return "Planet";
         }
 
-        createOrbitPlanet(0.35, 0xa1a1aa, 9, 0.14);
-        createOrbitPlanet(0.7, 0xf97316, 13, 0.11);
-        const earthMesh = createOrbitPlanet(0.9, 0x2563eb, 18, 0.08, false, 'earth', "Earth");
+        createOrbitPlanet(0.3, 0xa1a1aa, 8, 0.14);
+        createOrbitPlanet(0.6, 0xf97316, 11, 0.11);
+        const earthMesh = createOrbitPlanet(0.8, 0x2563eb, 15, 0.08, false, 'earth', "Earth");
         
-        const moonGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        const moonGeo = new THREE.SphereGeometry(0.18, 16, 16);
         moonGeo.computeBoundingSphere();
         const moonMesh = new THREE.Mesh(moonGeo, new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
         moonMesh.userData = { planetName: "Moon", originalScale: moonMesh.scale.x };
         earthMesh.add(moonMesh);
         clickableObjects.push(moonMesh);
 
-        createOrbitPlanet(0.6, 0xdc2626, 23, 0.06);
-        createOrbitPlanet(1.5, 0xb45309, 30, 0.035, false, 'jupiter');
-        createOrbitPlanet(1.2, 0xfde047, 37, 0.025, true);
-        createOrbitPlanet(0.9, 0x38bdf8, 44, 0.018);
-        createOrbitPlanet(0.85, 0x3b82f6, 51, 0.012);
+        createOrbitPlanet(0.5, 0xdc2626, 19, 0.06);
+        createOrbitPlanet(1.2, 0xb45309, 24, 0.035, false, 'jupiter');
+        createOrbitPlanet(1.0, 0xfde047, 29, 0.025, true);
+        createOrbitPlanet(0.75, 0x38bdf8, 34, 0.018);
+        createOrbitPlanet(0.7, 0x3b82f6, 39, 0.012);
 
-        // --- ROCKET SHIP PLACED BESIDE COSMO (NON-OVERLAPPING & MATCHING SCALE) ---
+        // --- ROCKET SHIP PLACED BESIDE COSMO ON THE RIGHT (NON-OVERLAPPING) ---
         const rocketGroup = new THREE.Group();
-        const rocketOriginalPos = new THREE.Vector3(2.4, -9.0, 1.0); // Placed further aside and lower
+        const rocketOriginalPos = new THREE.Vector3(3.2, -9.0, 1.0); // Placed safely on the right side
         rocketGroup.position.copy(rocketOriginalPos);
-        rocketGroup.scale.set(1.4, 1.4, 1.4); // Scaled to match Cosmo's size
+        rocketGroup.scale.set(1.4, 1.4, 1.4); // Matching Cosmo's size
         scene.add(rocketGroup);
 
         const metalMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.8, roughness: 0.2 });
@@ -529,9 +531,9 @@
             }, 3500);
         };
 
-        // --- LOAD 3D CHARACTER (COSMO) LOWER CENTER ---
+        // --- LOAD 3D CHARACTER (COSMO) ON THE RIGHT SIDE ---
         let modelContainer = new THREE.Group();
-        modelContainer.position.set(0, -9.2, 0); // Positioned lower on the screen
+        modelContainer.position.set(1.0, -9.2, 0); // Positioned on the right side, lower screen
         scene.add(modelContainer);
         
         let mixer;
@@ -595,7 +597,7 @@
         }
 
         let isCinematicZoom = false;
-        let cinematicTargetLook = new THREE.Vector3(0, -6.5, 0);
+        let cinematicTargetLook = new THREE.Vector3(1.0, -6.5, 0);
 
         function zoomToTarget(mesh) {
             const worldPos = new THREE.Vector3();
@@ -692,6 +694,7 @@
         }
 
         function robotSpeak(text) {
+            initAudio(); // Ensures browser allows audio/speech on mobile user interaction
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             isSpeakingNow = true;
@@ -768,11 +771,11 @@
         }
 
         window.toggleVoiceRecognition = async function() {
+            initAudio(); // Required for mobile gesture-based audio authorization
             if (!recognition) {
                 alert("Voice recognition not supported.");
                 return;
             }
-            initAudio();
             if (!isListening) {
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -837,7 +840,7 @@
             if (isCinematicZoom) {
                 controls.target.lerp(cinematicTargetLook, 3 * deltaTime);
             } else {
-                controls.target.lerp(new THREE.Vector3(0, -6.5, 0), 3 * deltaTime);
+                controls.target.lerp(new THREE.Vector3(1.0, -6.5, 0), 3 * deltaTime);
             }
 
             controls.update();
